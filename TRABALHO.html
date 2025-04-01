@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Alunos</title>
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            text-align: center;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            margin: 5px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .concluido {
+            text-decoration: line-through;
+            color: rgb(219, 216, 216);
+        }
+    </style>
+</head>
+<body>
+    <h2>Lista de Alunos</h2>
+    <input type="text" id="tarefaInput" placeholder="Digite um Nome">
+    <input type="text" id="numeroInput" placeholder="Digite um Número">
+    <button onclick="adicionarAluno()">Adicionar</button>
+    <button onclick="limparAlunos()">Limpar tudo</button>
+
+    <ul id="listaAlunos"></ul>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", carregarAlunos);
+
+        function adicionarAluno() {
+            let nomeInput = document.getElementById("tarefaInput");
+            let numeroInput = document.getElementById("numeroInput");
+            let nome = nomeInput.value.trim();
+            let numero = numeroInput.value.trim();
+
+            if (nome === "" || numero === "") return;
+
+            let alunos = JSON.parse(localStorage.getItem("alunos")) || [];
+            alunos.push({ nome, numero, concluido: false });
+            localStorage.setItem("alunos", JSON.stringify(alunos));
+
+            nomeInput.value = "";
+            numeroInput.value = "";
+            renderizarAlunos();
+        }
+
+        function carregarAlunos() {
+            renderizarAlunos();
+        }
+
+        function renderizarAlunos() {
+            let lista = document.getElementById("listaAlunos");
+            lista.innerHTML = "";
+            let alunos = JSON.parse(localStorage.getItem("alunos")) || [];
+
+            alunos.forEach((aluno, index) => {
+                let li = document.createElement("li");
+                li.textContent = `${aluno.nome} - ${aluno.numero}`;
+
+                if (aluno.concluido) li.classList.add("concluido");
+
+                li.onclick = function () {
+                    aluno.concluido = !aluno.concluido;
+                    alunos[index] = aluno;  // Atualiza o aluno na lista
+                    localStorage.setItem("alunos", JSON.stringify(alunos));
+                    renderizarAlunos();
+                };
+
+                let btnRemover = document.createElement("button");
+                btnRemover.textContent = "X";
+                btnRemover.onclick = function (event) {
+                    event.stopPropagation();
+                    alunos.splice(index, 1);
+                    localStorage.setItem("alunos", JSON.stringify(alunos));
+                    renderizarAlunos();
+                };
+
+                btnRemover.style.marginLeft = "10px";
+                li.appendChild(btnRemover);
+                lista.appendChild(li);
+            });
+        }
+
+        function limparAlunos() {
+            localStorage.removeItem("alunos");
+            renderizarAlunos();
+        }
+    </script>
+</body>
+</html>
